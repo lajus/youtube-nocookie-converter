@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Convertisseur de liens Youtube vers Youtube NoCookie</title>
+
+    <style>
+        table {
+            min-width: 50%;
+        }
+
+        td {
+            height: 20pt;
+        }
+
+        .col1 {
+            width: 70%;
+        }
+
+        .col2 {
+            width: 28%;
+        }
+
+        input,
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            width: 98%;
+            height: 100%;
+        }
+
+        button {
+            width: 98%;
+            height: 100%;
+        }
+    </style>
+
+    <script>
+        function selectText(nodeId) {
+            // @source: https://stackoverflow.com/questions/985272/selecting-text-in-an-element-akin-to-highlighting-with-your-mouse
+            const node = document.getElementById(nodeId);
+
+            if (document.body.createTextRange) {
+                const range = document.body.createTextRange();
+                range.moveToElementText(node);
+                range.select();
+            } else if (window.getSelection) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(node);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                console.warn("Could not select text in node: Unsupported browser.");
+            }
+        }
+
+        function generate() {
+            // @author: Jonathan Lajus
+            var linkyt = document.getElementById("lienyt").value;
+            const re1 = /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=(?<link>[_a-zA-Z0-9]+)(((&[^t]=[^&]+)|(&[^&=]{2,}=[^&]+)))*(&t=(?<timestamp>[0-9]+))?/;
+            const re2 = /^(https?:\/\/)?youtu\.be\/(?<link>[_a-zA-Z0-9]+)(\?(((([^t]=[^&]+)|([^&=]{2,}=[^&]+))&))*(t=(?<timestamp>[0-9]+))?)?/;
+            const re3 = /^(?<link>[_a-zA-Z0-9]+)(\?t=(?<timestamp>[0-9]+))?$/;
+            const re4 = /^(https?:\/\/)?(www\.)?youtube-nocookie\.com\/embed\/(?<link>[_a-zA-Z0-9]+)(\?start=(?<timestamp>[0-9]+))?/;
+
+            var m;
+            if ((m = linkyt.match(re1)) != null || (m = linkyt.match(re2)) != null || (m = linkyt.match(re4)) != null || (m = linkyt.match(re3)) != null) {
+
+                var ytnc = "https://www.youtube-nocookie.com/embed/" + m["groups"]["link"];
+                if (m["groups"]["timestamp"]) {
+                    ytnc = ytnc + "?start=" + m["groups"]["timestamp"]
+                }
+
+                var iframe = '<iframe width="800" height="400" src="' + ytnc + '"></iframe>';
+                //console.log(iframe);
+
+                document.getElementById("errormsg").innerHTML = "&nbsp;";
+                document.getElementById("outputlink").innerText = ytnc;
+                document.getElementById("outputiframe").innerText = iframe;
+                selectText("outputlink");
+            } else {
+                document.getElementById("errormsg").innerText = "Cette url n'est pas valide !";
+                document.getElementById("outputlink").innerText = "";
+                document.getElementById("outputiframe").innerText = "";
+            }
+        }
+
+        function clipText(nodeId) {
+            // @source: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+            // Get the text field
+            var copyText = document.getElementById(nodeId);
+
+            selectText(nodeId);
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyText.innerText);
+        }
+    </script>
+
+</head>
+
+<body>
+    <h1>Convertisseur de liens Youtube vers Youtube NoCookie</h1>
+    <i id="errormsg" style="color:red">&nbsp;</i>
+    <table>
+        <tbody>
+            <tr style="border-bottom:1px solid black">
+                <td class="col1"><input id="lienyt" type="url" placeholder="Coller le lien youtube ici" autofocus></input></td>
+                <td class="col2">
+                    <button onclick="generate()">Générer</button>
+                </td>
+            </tr>
+            <tr>
+                <td class="col1">
+                    <pre id="outputlink"></pre>
+                </td>
+                <td class="col2"><button onclick="clipText('outputlink')">Copier</button></td>
+            </tr>
+            <tr>
+                <td class="col1">
+                    <pre id="outputiframe"></pre>
+                </td>
+                <td class="col2"><button onclick="clipText('outputiframe')">Copier</button></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
